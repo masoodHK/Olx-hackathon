@@ -1,0 +1,16 @@
+:root {
+  --primary-color: #ffffff;
+  --secondary-color: #ffffff;
+  --accent-color: #ffffff;
+}
+nav > ul {
+  display: flex;
+  list-style: none;
+  justify-content: flex-end;
+}
+nav > ul > a {
+  margin-right: auto;
+}
+nav > ul > li {
+  margin: 0 10px;
+}
