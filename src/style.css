@@ -2,14 +2,35 @@
   --primary-color: #ffffff;
   --secondary-color: #ffffff;
   --accent-color: #ffffff;
+  --main-font: Arial, Helvetica, sans-serif;
+  --heading-font: Arial, Helvetica, sans-serif;
+  --default-shadow: 10px 2px var(--accent-color);
+}
+body {
+  font-family: var(--main-font);
+  border-top: 3px solid var(--accent-color);
+  margin: 0;
+}
+h1,h2,h3,h4,h5,h6 {
+  font-family: var(--heading-font);
 }
 nav > ul {
   display: flex;
   list-style: none;
   justify-content: flex-end;
 }
+nav {
+  padding: 10px 0;
+}
+header {
+  color: var(--primary-color);
+  box-shadow: var(--default-shadow);
+}
 nav > ul > a {
   margin-right: auto;
+}
+nav > ul a {
+  text-decoration: none;
 }
 nav > ul > li {
   margin: 0 10px;
