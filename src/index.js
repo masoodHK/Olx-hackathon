@@ -1,6 +1,4 @@
 import auth from "./auth";
+import localforage from "localforage";
 
-const localForage = require("localforage");
-localForage.setDriver([localForage.INDEXEDDB, localForage.LOCALSTORAGE]);
-console.log(localForage);
-auth();
+localforage.setDriver([localforage.INDEXEDDB, localforage.LOCALSTORAGE]);
