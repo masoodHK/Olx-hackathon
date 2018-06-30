@@ -87,4 +87,5 @@ if('serviceWorker' in navigator) {
 window.addEventListener('beforeinstallprompt', function(event) {
       event.preventDefault();
       installPromptEvent = event;
+      console.log(installPromptEvent)
 });
