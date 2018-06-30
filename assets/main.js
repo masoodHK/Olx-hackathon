@@ -2,6 +2,7 @@ const auth = firebase.auth();
 const database = firebase.database();
 const storage = firebase.storage();
 const messaging = firebase.messaging();
+const installPromptEvent;
 
 function signUp() {
     let email = document.getElementById('email').value;
@@ -83,6 +84,14 @@ if('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
         .then(reg => console.log(`Service Worker Scope: ${reg.scope}`))
         .catch(error => console.log(error));
+    navigator.serviceWorker.ready.then(function(reg) { 
+       reg.sync.register('dataSync');
+    });
 }
+
+window.addEventListener('beforeinstallprompt', function(event) {
+      event.preventDefault();
+      installPromptEvent = event;
+});
 
 changeState();
