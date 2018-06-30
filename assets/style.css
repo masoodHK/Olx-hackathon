@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat:700|Source+Sans+Pro');
+:root {
+    --background: #34495e;
+    --foreground: #1abc9c;
+}
+.container {
+    width: 85%;
+    margin: 0 auto;
+}
+
+.ui.styled.accordion {
+    width: 100%;
+}
+
+.ui.menu,
+.ui.menu .item,
+.ui.menu .item:hover,
+.ui.menu .item:active,
+.ui.menu .item:focus {
+    background : var(--background);
+    color: var(--foreground);
+    border-radius: 0; 
+}
+
+.ui.modal {
+    border-top: 5px solid var(--foreground);
+    border-radius: 0;
+}
+
+.title > h4 {
+    display: inline;
+}
+
+#addPoll {
+    margin: 20px 0;
+}
+
+* {
+    margin:0; padding: 0;
+}
+body {
+    font-family: "Source Sans Pro", Arial, Helvetica, sans-serif;
+    border-top: 5px solid var(--foreground);
+}
+footer {
+    background: var(--background);
+    color: var(--foreground);
+    text-align: center;
+    padding: 10px;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    justify-content:flex-end;
+    flex-direction: row;
+}
+nav ul > li {
+    margin-right: 15px;
+    padding: 14px 16px;
+}
+nav ul > li > button.ui.button,
+nav ul > li > button.ui.button:hover,
+nav ul > li > button.ui.button:focus,
+nav ul > li > button.ui.button:active {
+    color: var(--background);
+    border: 3px solid var(--foreground);
+    background: var(--foreground);
+}
+nav ul > li:first-child button.ui.button {
+    color: var(--foreground);
+    background: var(--background);
+}
+main {
+    min-height: 82vh;
+}
