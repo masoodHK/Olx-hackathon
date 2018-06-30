@@ -3,33 +3,33 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="theme-color" content="#4285f4">
 
     <title>Olx Pakistan - Hackathon</title>
 
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.2/semantic.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/style.css">
     <link rel="manifest" href="manifest.json">
 </head>
 
 <body>
     <header>
-        <nav class="ui menu">
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
             <div class="container">
-                <a class="item">
-                    <h1>Polling App</h1>
-                </a>
-                <ul class="right menu">
-                    <li>
-                        <button onclick="showLoginModal()" class="ui button">Log In</button>
-                    </li>
-                    <li>
-                        <button onclick="showSignUpModal()" class="ui button">Register</button>
-                    </li>
-                </ul>
+                <a class="navbar-brand" href="javascript:void(0)">OLX Pakistan</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainMenu">
+                    <form class="form-inline ml-auto">
+                        <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#login">Log In</button>
+                        <button type="button" class="btn btn-primary ml-2" data-toggle="modal" data-target=".bd-example-modal-lg">Sign up</button>
+                    </form>
+                </div>
             </div>
         </nav>
     </header>
@@ -41,62 +41,76 @@
         <p>Created By: Masood Hasan Khan</p>
     </footer>
 
-    <div class="ui modal" id="login">
-        <i class="close icon"></i>
-        <div class="header">
-            Log In
-        </div>
-        <div class="content">
-            <div class="error-message"></div>
-            <form class="ui form" id="log-in-form" onsubmit="return false">
-                <div class="field">
-                    <label>E-mail</label>
-                    <input type="email" id="loginEmail" name="email" placeholder="E-mail">
+    <div class="modal fade" id="login" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Login</h4>
                 </div>
-                <div class="field">
-                    <label>Password</label>
-                    <input type="password" id="loginPassword" name="password" placeholder="Password">
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="form">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Email address</label>
+                                <input type="email" id="loginEmail" class="form-control" placeholder="Enter email">
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputPassword1">Password</label>
+                                <input type="password" id="loginPassword" class="form-control" placeholder="Password">
+                            </div>
+                            <button class="btn btn-primary" onclick="logIn()">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
                 </div>
-                <button class="ui button" type="submit" onclick="logIn()">Submit</button>
-            </form>
-        </div>
-    </div>
-
-    <div class="ui modal" id="sign-up">
-        <i class="close icon"></i>
-        <div class="header">
-            Sign Up
-        </div>
-        <div class="content">
-            <div class="error-message"></div>
-            <form class="ui form" id="sign-up-form" onsubmit="return false">
-                <div class="field">
-                    <label>Username</label>
-                    <input type="text" id="username" placeholder="Username">
-                </div>
-                <div class="field">
-                    <label>E-mail</label>
-                    <input type="email" id="email" placeholder="E-mail">
-                </div>
-                <div class="field">
-                    <label>Password</label>
-                    <input type="password" id="password" placeholder="Password">
-                </div>
-                <div class="field">
-                    <label>Confirm Password</label>
-                    <input type="password" id="confirm-password" placeholder="Confirm Password">
-                </div>
-                <button class="ui button" type="submit" onclick="signUp()">Submit</button>
-            </form>
+            </div>
         </div>
     </div>
-
+    <div class="modal fade bd-example-modal-lg" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Register</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="username" class="form-control" placeholder="Enter Username">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="number" id="phone" class="form-control" placeholder="Enter Phone Number">
+                        </div>
+                        <div class="form-group">
+                            <label>Email address</label>
+                            <input type="email" id="email" class="form-control" placeholder="Enter email">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="password" class="form-control" placeholder="Password">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" id="confirm-password" class="form-control" placeholder="Password">
+                        </div>
+                        <button class="btn btn-primary" onclick="signUp()">Submit</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="https://www.gstatic.com/firebasejs/5.1.0/firebase.js"></script>
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-        crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.2/semantic.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script src="assets/auth.js"></script>
     <script src="assets/main.js"></script>
 </body>
-
-</html>

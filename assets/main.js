@@ -2,7 +2,7 @@ const auth = firebase.auth();
 const database = firebase.database();
 const storage = firebase.storage();
 const messaging = firebase.messaging();
-const installPromptEvent;
+var installPromptEvent;
 
 function signUp() {
     let email = document.getElementById('email').value;
@@ -25,13 +25,8 @@ function signUp() {
             var errorCode = err.code;
             var errorMessage = err.message;
             if (errorCode === 'auth/weak-password') {
-                document.getElementsByClassName("error-message")[1].innerHTML = `<p>The password is too weak.</p>`
-            } else {
-                document.getElementsByClassName("error-message")[1].innerHTML = `<p>${errorMessage}</p>`
+                alert("the password is too weak")
             }
-            setTimeout(() =>{
-                document.getElementsByClassName("error-message")[1].innerHTML = ""
-            },5000)
             console.log(`${err}`)
         });
     }
@@ -93,5 +88,3 @@ window.addEventListener('beforeinstallprompt', function(event) {
       event.preventDefault();
       installPromptEvent = event;
 });
-
-changeState();

@@ -1,9 +1,9 @@
 var config = {
-    apiKey: "AIzaSyCt3LBGUr1WfxbFBvzj9kgX9Ir0SAGCDaY",
-    authDomain: "polling-app-ac22a.firebaseapp.com",
-    databaseURL: "https://polling-app-ac22a.firebaseio.com",
-    projectId: "polling-app-ac22a",
-    storageBucket: "polling-app-ac22a.appspot.com",
-    messagingSenderId: "880233554117"
- };
- firebase.initializeApp(config);
+    apiKey: "AIzaSyBSSMHKLO1kzQe3hml6grFUt9yBrP8lyps",
+    authDomain: "olx-hackathon.firebaseapp.com",
+    databaseURL: "https://olx-hackathon.firebaseio.com",
+    projectId: "olx-hackathon",
+    storageBucket: "",
+    messagingSenderId: "541854613995"
+};
+firebase.initializeApp(config);
