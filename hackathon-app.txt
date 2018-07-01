@@ -1,0 +1,20 @@
+newsCategory.addEventListener('change', (event) => {
+  updateNews(event.target.value);
+})
+
+window.addEventListener('load', (event) => {
+  updateNewsSources().then(res => {
+    newsCategory.value = defaultSource;
+    updateNews();
+  });
+})
+
+
+ads
+    name
+    category
+    seller
+    model
+    pictures
+
+user

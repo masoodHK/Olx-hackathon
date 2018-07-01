@@ -1,20 +1,31 @@
-// const cacheVersion = 'v2';
-// const cacheName = `app-olx-${cacheVersion}`;
-// const files = [
-//     'index.html',
-//     'assets/auth.js',
-//     'assets/main.js',
-//     'assets/style.css'
-// ];
+const cacheVersion = 'v1';
+const cacheName = `app-olx-${cacheVersion}`;
+const files = [
+    'index.html',
+    'assets/js/auth.js',
+    'assets/js/main.js',
+    'assets/js/popper.min.js',
+    'assets/js/jquery.min.js',
+    'assets/js/bootstrap.min.js',
+    'assets/css/all.css',
+    'assets/css/bootstrap.min.css',
+    'assets/css/style.css',
+    'https://www.gstatic.com/firebasejs/5.1.0/firebase.js'
+];
 
-// self.addEventListener('install', event => {
-//     event.waitUntil(updateCache(event.request))
-//     self.skipWaiting(); 
-// });
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(cacheName)
+            .then(cache => {
+                cache.addAll(files);
+            })
+    )
+    self.skipWaiting(); 
+});
 
-// self.addEventListener('activate', event => {
-//     event.waitUntil(clients.claim(), deleteKeys());
-// });
+self.addEventListener('activate', event => {
+    event.waitUntil(clients.claim(), deleteKeys());
+});
 
 // self.addEventListener('fetch', function(event) {
 //     event.respondWith(
@@ -28,31 +39,20 @@
 //         });
 //       })
 //     );
+//     event.waitUntil(updateCache(event.request));
 // });
 
-// function cacheFiles() {
-//     return caches.open(cacheName)
-//         .then(cache => {
-//             cache.addAll(files);
-//         })
-// }
-
-// async function cacheFilesAsync() {
-//     let cache = await caches.open(cacheName);
-//     cache.addAll(files);
-// }
-
-// function deleteKeys() {
-//     return caches.keys()
-//         .then(keys => Promise.all(
-//             keys.map(cacheKey => {
-//                 if(cacheKey !== cacheName){
-//                     console.log(`Deleted: ${cacheKey}`)
-//                     return caches.delete(cacheKey)
-//                 }
-//             })
-//         ))
-// }
+function deleteKeys() {
+    return caches.keys()
+        .then(keys => Promise.all(
+            keys.map(cacheKey => {
+                if(cacheKey !== cacheName && cacheKey.startsWith("app-olx-")){
+                    console.log(`Deleted: ${cacheKey}`)
+                    return caches.delete(cacheKey)
+                }
+            })
+        ))
+}
 
 // function updateCache(request) {
 //     return caches.open(cacheName).then(function (cache) {
