@@ -14,11 +14,11 @@ footer > p {
     margin: 0;
 }
 main {
-    min-height: 81vh;
+    min-height: 78vh;
 }
 
 .container > #posts{
-    padding: 30px;
+    padding: 10px 0;
     background: #dddddd;    
 }
 .btn-outline-primary {
@@ -42,6 +42,14 @@ main {
 .modal-header {
     border-top: 3px solid #fd7e14;
 }
+.card-img-top {
+    max-width:100%;
+    height: auto;
+}
+.thumb {
+    width: 100%;
+    height: auto;
+}
 #user {
     color: #dddddd;
 }
@@ -55,8 +63,8 @@ main {
     display: grid;
     overflow-y: scroll;
     max-height: 78vh;
-    grid-gap: 25px;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     grid-auto-rows: max-content;
     grid-auto-flow: row dense;
 }

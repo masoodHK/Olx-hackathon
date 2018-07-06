@@ -1,4 +1,10 @@
-const cacheVersion = 'v1';
+importScripts('https://www.gstatic.com/firebasejs/5.1.0/firebase-app.js');
+importScripts('https://www.gstatic.com/firebasejs/5.1.0/firebase-messaging.js');
+importScripts('assets/js/auth.js');
+
+const messaging = firebase.messaging();
+
+const cacheVersion = 'v1.3';
 const cacheName = `app-olx-${cacheVersion}`;
 const files = [
     'index.html',
@@ -7,20 +13,14 @@ const files = [
     'assets/js/popper.min.js',
     'assets/js/jquery.min.js',
     'assets/js/bootstrap.min.js',
-    'assets/css/all.css',
+    'https://use.fontawesome.com/releases/v5.1.0/css/all.css',
     'assets/css/bootstrap.min.css',
-    'assets/css/style.css',
-    'https://www.gstatic.com/firebasejs/5.1.0/firebase.js'
+    'assets/css/style.css'
 ];
 
 self.addEventListener('install', event => {
-    event.waitUntil(
-        caches.open(cacheName)
-            .then(cache => {
-                cache.addAll(files);
-            })
-    )
-    self.skipWaiting(); 
+    event.waitUntil(precache())
+    self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
@@ -46,7 +46,7 @@ function deleteKeys() {
     return caches.keys()
         .then(keys => Promise.all(
             keys.map(cacheKey => {
-                if(cacheKey !== cacheName && cacheKey.startsWith("app-olx-")){
+                if (cacheKey !== cacheName) {
                     console.log(`Deleted: ${cacheKey}`)
                     return caches.delete(cacheKey)
                 }
@@ -54,6 +54,12 @@ function deleteKeys() {
         ))
 }
 
+function precache() {
+    return caches.open(cacheName)
+        .then(cache => {
+            return cache.addAll(files);
+        })
+}
 // function updateCache(request) {
 //     return caches.open(cacheName).then(function (cache) {
 //         return fetch(request).then(function (response) {
