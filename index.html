@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="theme-color" content="#4285f4">
+    <meta name="theme-color" content="#fd7e14">
 
     <title>OLX Pakistan - Hackathon</title>
 
-    <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css">
+    <!-- <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css"> -->
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="manifest" href="manifest.json">
@@ -19,7 +19,9 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="javascript:void(0)">OLX Pakistan</a>
+                <a class="navbar-brand" href="javascript:void(0)">
+                    <img src="assets/images/icons/icon-72x72.png">
+                </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false"
                     aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -69,7 +71,7 @@
         <div id="main">
             <div class="container">
                 <div id="posts">
-                    
+
                 </div>
             </div>
         </div>
@@ -163,6 +165,28 @@
             </div>
         </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="profile" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="modelTitleId">User's Ad Listings</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <tbody id="ads">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="ad-submit" role="dialog" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -216,7 +240,6 @@
             </div>
         </div>
     </div>
-    <!-- <script src="assets/js/firebase.js"></script> -->
     <script defer src="https://www.gstatic.com/firebasejs/5.1.0/firebase.js"></script>
     <script defer src="assets/js/jquery.min.js"></script>
     <script defer src="assets/js/popper.min.js"></script>

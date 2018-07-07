@@ -8,13 +8,3 @@ window.addEventListener('load', (event) => {
     updateNews();
   });
 })
-
-
-ads
-    name
-    category
-    seller
-    model
-    pictures
-
-user

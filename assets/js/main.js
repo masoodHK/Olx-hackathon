@@ -45,9 +45,7 @@ function signUp() {
                 userSignedIn.updateProfile({
                     displayName: username
                 })
-                setTimeout(() => {
-                    location = 'index.html';
-                }, 1000)
+                location.reload();
             }).catch((err) => {
                 var errorCode = err.code;
                 var errorMessage = err.message;
@@ -63,9 +61,7 @@ function logIn() {
     let email = document.getElementById('loginEmail').value;
     let password = document.getElementById('loginPassword').value;
     auth.signInWithEmailAndPassword(email, password).then(() => {
-            setTimeout(() => {
-                location = 'index.html';
-            }, 1000)
+            location.reload();
         })
         .catch((err) => {
             var errorCode = err.code;
@@ -94,7 +90,7 @@ function changeState() {
         if (user) {
             nav.html(`
                 <div id="user">
-                    <a class="nav-link" onclick="alert('test')">Welcome: ${user.displayName}</a>
+                    <a class="nav-link" data-toggle="modal" data-target="#profile">Welcome: ${user.displayName}</a>
                 </div>
                 <a onclick="signOut()" class="btn btn-primary">Sign Out</a>
             `);
@@ -108,58 +104,47 @@ function showPosts(categories = null, searchQuery = null) {
     const postsDiv = $('.container > #posts');
     const adRef = database.ref('ads')
     let adPost;
-    adRef.on('child_added', snapshot => {
-        if (snapshot.exists()) {
-            adPost = renderAd(snapshot.val(), snapshot.key)
-            postsDiv.append(adPost);
-        } else {
-            postsDiv.append(`
-                <div class="text-center">        
-                    <h3>Nothing to show here</h3>
-                    <p>Please try again later......
-                        <i class="fa fa-sad-tear"></i>
-                    </p>
-                </div>
-            `)
-        }
-    });
+    if(categories && searchQuery){
+        return;
+    }
+    else if(categories){
+        adRef.orderByChild('category').equalTo(categories)
+            .on('value', snapshot => {
+                if (snapshot.exists()) {
+                    adPost = renderAd(snapshot.val());
+                    postsDiv.append(adPost);
+                } else {
+                    postsDiv.append(`
+                        <div class="text-center">        
+                            <h3>Nothing to show here</h3>
+                            <p>Please try again later......
+                                <i class="fa fa-sad-tear"></i>
+                            </p>
+                        </div>
+                    `)
+                }
+            })
+    }
+    else{
+        adRef.on('child_added', snapshot => {
+            if (snapshot.exists()) {
+                adPost = renderAd(snapshot.val());
+                postsDiv.append(adPost);
+            } else {
+                postsDiv.append(`
+                    <div class="text-center">        
+                        <h3>Nothing to show here</h3>
+                        <p>Please try again later......
+                            <i class="fa fa-sad-tear"></i>
+                        </p>
+                    </div>
+                `)
+            }
+        });
+    }
 }
 
-function renderAd(data, key) {
-    if (auth.currentUser) {
-        if (data.authorID === auth.currentUser.uid) {
-            return `
-                <div class="card">
-                    <img class="card-img-top" src="${data.adImage}" alt="Card image cap">
-                    <div class="card-body">
-                        <h1>${data.adName} <span class="badge badge-secondary">${data.pricing} Rs.</span></h1>
-                        <small>Made by: ${data.adAuthor}</small>
-                        <hr>
-                        <p>${data.adDesc}</p>
-                    </div>
-                    <div class="card-footer">
-                        <a class="btn btn-danger" onclick="deleteAdPost('${key}')">
-                            <i class="fa fa-trash-alt"></i> Delete Ad
-                        </a>
-                    </div>
-                </div>
-            `
-        }
-        else {
-            return `
-                <div class="card">
-                    <img class="card-img-top" src="${data.adImage}" alt="Card image cap">
-                    <div class="card-body">
-                        <h1>${data.adName} <span class="badge badge-secondary">${data.pricing} Rs.</span></h1>
-                        <small>Made by: ${data.adAuthor}</small>
-                        <hr>
-                        <p>${data.adDesc}</p>
-                    </div>
-                </div>
-            `
-        }
-    } 
-  	else {
+function renderAd(data) {
         return `
             <div class="card">
                 <img class="card-img-top" src="${data.adImage}" alt="Card image cap">
@@ -171,13 +156,21 @@ function renderAd(data, key) {
                 </div>
             </div>
         `
-    }
 }
 
 function search() {
     let searchQuery = document.getElementById("searchBar").value
     let category = document.getElementById("categories").value
     showPosts(category, searchQuery);
+}
+
+function showUsersAds(data, key) {
+    return `
+        <tr>
+            <td>${data.adName}</td>
+            <td><button onclick="deleteAdPost('${key}')"></button></td>
+        </tr>
+    `
 }
 
 function deleteAdPost(key) {
@@ -237,6 +230,10 @@ window.addEventListener('beforeinstallprompt', function(event) {
     console.log(installPromptEvent)
 });
 
-messaging.requestPermission()
+messaging.requestPermission().then(() => {
+    alert("Notification Request has been granted");
+}).catch(() => {
+    alert("Notification Request has been denied");
+})
 
 changeState();

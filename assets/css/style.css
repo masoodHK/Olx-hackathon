@@ -50,6 +50,10 @@ main {
     width: 100%;
     height: auto;
 }
+.navbar-brand > img {
+    width: 60%;
+    height: auto 
+}
 #user {
     color: #dddddd;
 }
