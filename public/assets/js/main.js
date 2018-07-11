@@ -151,6 +151,7 @@ function renderAd(data) {
                 <div class="card-body">
                     <h1>${data.adName} <span class="badge badge-secondary">${data.pricing} Rs.</span></h1>
                     <small>Made by: ${data.adAuthor}</small>
+                    <p>Category: ${data.category}</p>
                     <hr>
                     <p>${data.adDesc}</p>
                 </div>
@@ -208,6 +209,10 @@ function addNewAd() {
     });
 
 }
+
+$("select#categories").on('change', function(event) {
+    
+});
 
 function deletePoll(pid = null) {
     database.ref(`users/${auth.currentUser.uid}/polls/${pid}`).remove();

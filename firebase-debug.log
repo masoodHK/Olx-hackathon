@@ -1,0 +1,50 @@
+[debug] [2018-07-10T21:29:21.560Z] ----------------------------------------------------------------------
+[debug] [2018-07-10T21:29:21.581Z] Command:       E:\nodejs\node.exe C:\Users\Lenovo\AppData\Roaming\npm\node_modules\firebase-tools\bin\firebase serve
+[debug] [2018-07-10T21:29:21.582Z] CLI Version:   3.19.1
+[debug] [2018-07-10T21:29:21.582Z] Platform:      win32
+[debug] [2018-07-10T21:29:21.582Z] Node Version:  v8.11.3
+[debug] [2018-07-10T21:29:21.584Z] Time:          Wed Jul 11 2018 02:29:21 GMT+0500 (Pakistan Standard Time)
+[debug] [2018-07-10T21:29:21.585Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2018-07-10T21:29:21.725Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2018-07-10T21:29:21.726Z] > authorizing via signed-in user
+[debug] [2018-07-10T21:29:21.729Z] > refreshing access token with scopes: ["email","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","openid"]
+[debug] [2018-07-10T21:29:21.729Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ { refresh_token: '1/MHhVc3s13skhH1Gq_2nHkCcTaiaO5gDhStED6e753cg',
+  client_id: '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com',
+  client_secret: 'j9iVZfS8kkCEFUPaAeJV0sAi',
+  grant_type: 'refresh_token',
+  scope: 'email https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloudplatformprojects.readonly https://www.googleapis.com/auth/firebase openid' } 
+ Wed Jul 11 2018 02:29:21 GMT+0500 (Pakistan Standard Time)
+[debug] [2018-07-10T21:29:22.172Z] <<< HTTP RESPONSE 200
+[debug] [2018-07-10T21:29:22.244Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/projects/olx-hackathon  
+  
+ Wed Jul 11 2018 02:29:22 GMT+0500 (Pakistan Standard Time)
+[debug] [2018-07-10T21:29:23.534Z] <<< HTTP RESPONSE 200
+[debug] [2018-07-10T21:29:23.535Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/database/olx-hackathon/tokens  
+  
+ Wed Jul 11 2018 02:29:23 GMT+0500 (Pakistan Standard Time)
+[debug] [2018-07-10T21:29:24.535Z] <<< HTTP RESPONSE 200
+[debug] [2018-07-10T21:29:24.536Z] >>> HTTP REQUEST GET https://cloudresourcemanager.googleapis.com/v1/projects/olx-hackathon  
+  
+ Wed Jul 11 2018 02:29:24 GMT+0500 (Pakistan Standard Time)
+[debug] [2018-07-10T21:29:26.251Z] <<< HTTP RESPONSE 200
+[info] 
+[info] === Serving from 'C:\Users\Lenovo\Desktop\boilerplate-codes'...
+[info] 
+[info] i  functions: Preparing to emulate functions.
+[debug] [2018-07-10T21:30:06.401Z] Fetching environment
+[debug] [2018-07-10T21:30:06.415Z] >>> HTTP REQUEST GET https://mobilesdk-pa.googleapis.com/v1/projects/541854613995:getServerAppConfig  
+  
+ Wed Jul 11 2018 02:30:06 GMT+0500 (Pakistan Standard Time)
+[debug] [2018-07-10T21:30:06.416Z] >>> HTTP REQUEST GET https://mobilesdk-pa.googleapis.com/v1/projects/541854613995/clients/_:getWebAppConfig  
+  
+ Wed Jul 11 2018 02:30:06 GMT+0500 (Pakistan Standard Time)
+[debug] [2018-07-10T21:30:07.863Z] <<< HTTP RESPONSE 200
+[debug] [2018-07-10T21:30:08.346Z] <<< HTTP RESPONSE 200
+[debug] [2018-07-10T21:30:08.346Z] Starting @google-cloud/functions-emulator
+[info] i  hosting: Serving hosting files from: public
+[info] +  hosting: Local server: http://localhost:5000
+
+[debug] [2018-07-10T21:30:22.779Z] Parsing function triggers
+[info] i  functions: No HTTPS functions found. Use firebase functions:shell if you would like to emulate other types of functions.

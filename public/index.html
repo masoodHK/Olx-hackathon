@@ -1,65 +1,251 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+<html lang="en">
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/5.2.0/firebase-app.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/5.2.0/firebase-auth.js"></script>
-    <script defer src="/__/firebase/5.2.0/firebase-database.js"></script>
-    <script defer src="/__/firebase/5.2.0/firebase-messaging.js"></script>
-    <script defer src="/__/firebase/5.2.0/firebase-storage.js"></script>
-    <!-- initialize the SDK after all desired features are loaded -->
-    <script defer src="/__/firebase/init.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="theme-color" content="#fd7e14">
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
+    <title>OLX Pakistan - Hackathon</title>
+
+    <!-- <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css"> -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="javascript:void(0)">
+                    <img src="assets/images/icons/icon-72x72.png">
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainMenu">
+                    <form class="form-inline ml-auto">
+                        <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#login">Log In</button>
+                        <button type="button" class="btn btn-primary ml-2" data-toggle="modal" data-target=".bd-example-modal-lg">Sign up</button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div id="search" class="my-3">
+            <div class="container">
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        <select class="form-control" id="categories">
+                            <option value="">Select Categories</option>
+                            <option value="clothings">Clothings</option>
+                            <option value="mobile-accessories">Mobile Accessories</option>
+                            <option value="home-ownership">Home Ownership or Rental</option>
+                            <option value="jobs">Jobs</option>
+                            <option value="retail-stores">Retail Store or Ownership</option>
+                            <option value="vehicles">Vehicles</option>
+                            <option value="home-decor">Home Decorations and Accessories</option>
+                            <option value="animals">Animals or Pet Ownerships</option>
+                            <option value="beauty-products">Beauty Products</option>
+                            <option value="kids">Kids</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-7">
+                        <input type="text" class="form-control" id="searchBar">
+                    </div>
+                    <div class="form-group-col-md-2">
+                        <button class="btn btn-primary">
+                            <i class="fa fa-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="addNewPost" class="my-1">
+            <div class="container"></div>
+        </div>
+        <div id="main">
+            <div class="container">
+                <div id="posts">
+
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>Created By: Masood Hasan Khan</p>
+    </footer>
+
+    <div class="modal fade" id="login" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Login</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="form">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Email address</label>
+                                <input type="email" id="loginEmail" class="form-control" placeholder="Enter email">
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputPassword1">Password</label>
+                                <input type="password" id="loginPassword" class="form-control" placeholder="Password">
+                            </div>
+                            <button class="btn btn-primary" onclick="logIn()">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+    <div class="modal fade bd-example-modal-lg" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Register</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="username" class="form-control" placeholder="Enter Username">
+                        </div>
+                        <div class="form-group">
+                            <label>Email address</label>
+                            <input type="email" id="email" class="form-control" placeholder="Enter email">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="password" class="form-control" placeholder="Password">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" id="confirm-password" class="form-control" placeholder="Password">
+                        </div>
+                        <button class="btn btn-primary" onclick="signUp()">Submit</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="chat-modal" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Chat with:
+                        <span id="individual"></span>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div id="chat-message">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="message">
+                            <button class="btn btn-primary">
+                                <i class="fa fa-envelope"></i> Send Message
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="profile" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="modelTitleId">User's Ad Listings</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <tbody id="ads">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="ad-submit" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Submit an advertisement</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form">
+                        <div class="form-group">
+                            <label>Advertisement Name</label>
+                            <input type="text" id="ad-name" class="form-control" placeholder="Enter the Advertisement Name">
+                        </div>
+                        <div class="form-group">
+                            <label>Pricing</label>
+                            <input type="text" id="ad-pricing" class="form-control" placeholder="Enter its price">
+                        </div>
+                        <div class="form-group">
+                            <label>Categories</label>
+                            <select class="form-control" id="formCategories">
+                                <option value="">Select Categories</option>
+                                <option value="clothings">Clothings</option>
+                                <option value="mobile-accessories">Mobile Accessories</option>
+                                <option value="home-ownership">Home Ownership or Rental</option>
+                                <option value="jobs">Jobs</option>
+                                <option value="retail-stores">Retail Store or Ownership</option>
+                                <option value="vehicles">Vehicles</option>
+                                <option value="home-decor">Home Decorations and Accessories</option>
+                                <option value="animals">Animals or Pet Ownerships</option>
+                                <option value="beauty-products">Beauty Products</option>
+                                <option value="kids">Kids</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <input type="file" id="adImage">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <div id="imagePreview"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea class="form-control" rows="3" id="description"></textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="addNewAd()">Submit</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script defer src="https://www.gstatic.com/firebasejs/5.1.0/firebase.js"></script>
+    <script defer src="assets/js/jquery.min.js"></script>
+    <script defer src="assets/js/popper.min.js"></script>
+    <script defer src="assets/js/bootstrap.min.js"></script>
+    <script defer src="assets/js/auth.js"></script>
+    <script defer src="assets/js/main.js"></script>
+</body>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-
-        try {
-          let app = firebase.app();
-          let features = ['auth', 'database', 'messaging', 'storage'].filter(feature => typeof app[feature] === 'function');
-          document.getElementById('load').innerHTML = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
-        }
-      });
-    </script>
-  </body>
 </html>
