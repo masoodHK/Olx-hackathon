@@ -1,0 +1,18 @@
+[debug] [2018-07-12T20:13:36.056Z] ----------------------------------------------------------------------
+[debug] [2018-07-12T20:13:36.086Z] Command:       E:\nodejs\node.exe C:\Users\Lenovo\AppData\Roaming\npm\node_modules\firebase-tools\bin\firebase deploy --only functions
+[debug] [2018-07-12T20:13:36.086Z] CLI Version:   3.19.3
+[debug] [2018-07-12T20:13:36.086Z] Platform:      win32
+[debug] [2018-07-12T20:13:36.086Z] Node Version:  v8.11.3
+[debug] [2018-07-12T20:13:36.120Z] Time:          Fri Jul 13 2018 01:13:36 GMT+0500 (Pakistan Standard Time)
+[debug] [2018-07-12T20:13:36.120Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2018-07-12T20:13:36.419Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2018-07-12T20:13:36.419Z] > authorizing via signed-in user
+[debug] [2018-07-12T20:13:36.423Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/projects/olx-hackathon  
+  
+ Fri Jul 13 2018 01:13:36 GMT+0500 (Pakistan Standard Time)
+[debug] [2018-07-12T20:13:40.289Z] <<< HTTP RESPONSE 200
+[debug] [2018-07-12T20:13:40.371Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/database/olx-hackathon/tokens  
+  
+ Fri Jul 13 2018 01:13:40 GMT+0500 (Pakistan Standard Time)
+[debug] [2018-07-12T20:13:44.765Z] <<< HTTP RESPONSE 200

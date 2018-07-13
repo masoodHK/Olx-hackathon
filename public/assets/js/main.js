@@ -9,7 +9,7 @@ let fileName;
 
 fileRef.on('change', function(event) {
     var file = event.target.files;
-
+    
     for (let i = 0, f; f = file[i]; i++) {
         if (!f.type.match('image/*')) {
             continue;
@@ -95,6 +95,11 @@ function changeState() {
                 <a onclick="signOut()" class="btn btn-primary">Sign Out</a>
             `);
             addGroup.html(`<button class="btn btn-primary" data-toggle="modal" data-target="#ad-submit">Add New Advertisement</button>`)
+            database.ref('ads').on('value', snapshot => {
+                snapshot.forEach(data => {
+                    $('#ads').append(showUsersAds(data.val(),data.key))
+                })
+            })
         }
     });
     showPosts()
@@ -103,35 +108,72 @@ function changeState() {
 function showPosts(categories = null, searchQuery = null) {
     const postsDiv = $('.container > #posts');
     const adRef = database.ref('ads')
-    let adPost;
+    var adPost = "";
     if(categories && searchQuery){
-        return;
+        adRef.orderByChild('category').equalTo(categories).on('value', snapshot => {
+            if (snapshot.exists()) {
+                snapshot.forEach(data => {
+                    ad = data.val();
+                    if(ad.adName == searchQuery){
+                        adPost += renderAd(data.val());
+                        postsDiv.html(adPost);
+                    }
+                    else {
+                        document.getElementById('posts').innerHTML = "";
+                        postsDiv.html(`
+                            <div class="text-center">        
+                                <h3>Nothing to show here</h3>
+                                <p>Please try again later......
+                                    <i class="fa fa-sad-tear"></i>
+                                </p>
+                            </div>
+                        `)
+                    }
+                })
+            } else {
+                document.getElementById('posts').innerHTML = "";
+                postsDiv.html(`
+                    <div class="text-center">        
+                        <h3>Nothing to show here</h3>
+                        <p>Please try again later......
+                            <i class="fa fa-sad-tear"></i>
+                        </p>
+                    </div>
+                `)
+            }
+        })
     }
     else if(categories){
-        adRef.orderByChild('category').equalTo(categories)
-            .on('value', snapshot => {
-                if (snapshot.exists()) {
-                    adPost = renderAd(snapshot.val());
-                    postsDiv.append(adPost);
-                } else {
-                    postsDiv.append(`
-                        <div class="text-center">        
-                            <h3>Nothing to show here</h3>
-                            <p>Please try again later......
-                                <i class="fa fa-sad-tear"></i>
-                            </p>
-                        </div>
-                    `)
-                }
-            })
+        console.log(categories)
+        adRef.orderByChild('category').equalTo(categories).on('value', snapshot => {
+            console.log(snapshot)
+            if (snapshot.exists()) {
+                snapshot.forEach(data => {
+                    adPost += renderAd(data.val());
+                    postsDiv.html(adPost);
+                })
+            } else {
+                document.getElementById('posts').innerHTML = "";
+                postsDiv.html(`
+                    <div class="text-center">        
+                        <h3>Nothing to show here</h3>
+                        <p>Please try again later......
+                            <i class="fa fa-sad-tear"></i>
+                        </p>
+                    </div>
+                `)
+            }
+        })
     }
     else{
-        adRef.on('child_added', snapshot => {
+        adRef.on('value', snapshot => {
             if (snapshot.exists()) {
-                adPost = renderAd(snapshot.val());
-                postsDiv.append(adPost);
+                snapshot.forEach(data => {
+                    adPost += renderAd(data.val());
+                    postsDiv.html(adPost);
+                })
             } else {
-                postsDiv.append(`
+                postsDiv.html("" + `
                     <div class="text-center">        
                         <h3>Nothing to show here</h3>
                         <p>Please try again later......
@@ -145,18 +187,18 @@ function showPosts(categories = null, searchQuery = null) {
 }
 
 function renderAd(data) {
-        return `
-            <div class="card">
-                <img class="card-img-top" src="${data.adImage}" alt="Card image cap">
-                <div class="card-body">
-                    <h1>${data.adName} <span class="badge badge-secondary">${data.pricing} Rs.</span></h1>
-                    <small>Made by: ${data.adAuthor}</small>
-                    <p>Category: ${data.category}</p>
-                    <hr>
-                    <p>${data.adDesc}</p>
-                </div>
+    return `
+        <div class="card">
+            <img class="card-img-top" src="${data.adImage}" alt="Card image cap">
+            <div class="card-body">
+                <h1>${data.adName} <span class="badge badge-secondary">${data.pricing} Rs.</span></h1>
+                <small>Made by: ${data.adAuthor}</small>
+                <p>Category: ${data.category}</p>
+                <hr>
+                <p>${data.adDesc}</p>
             </div>
-        `
+        </div>
+    `
 }
 
 function search() {
@@ -169,7 +211,7 @@ function showUsersAds(data, key) {
     return `
         <tr>
             <td>${data.adName}</td>
-            <td><button onclick="deleteAdPost('${key}')"></button></td>
+            <td><button class="btn btn-danger" onclick="deleteAdPost('${key}')">Delete this ad</button></td>
         </tr>
     `
 }
@@ -210,8 +252,8 @@ function addNewAd() {
 
 }
 
-$("select#categories").on('change', function(event) {
-    
+$("select#categories").change(function() {
+    showPosts($(this).val());
 });
 
 function deletePoll(pid = null) {
@@ -236,9 +278,15 @@ window.addEventListener('beforeinstallprompt', function(event) {
 });
 
 messaging.requestPermission().then(() => {
-    alert("Notification Request has been granted");
+    console.log("Notification Request has been granted");
+    return messaging.getToken();
+}).then(token => {
+    if(auth.currentUser) {
+        database.ref(`users/${auth.currentUser.uid}/token`).set({userToken: token})
+    }
+    console.log(token)
 }).catch(() => {
-    alert("Notification Request has been denied");
+    console.log("Notification Request has been denied");
 })
 
 changeState();
