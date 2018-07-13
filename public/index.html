@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="manifest" href="/manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/firebase@5.2.0/firebase.js"></script>
+    <script src="assets/js/auth.js"></script>
 </head>
 
 <body>
@@ -39,7 +41,7 @@
         <div id="search" class="my-3">
             <div class="container">
                 <div class="form-row">
-                    <div class="form-group col-md-3">
+                    <div class="form-group col">
                         <select class="form-control" id="categories">
                             <option value="">Select Categories</option>
                             <option value="clothings">Clothings</option>
@@ -54,10 +56,10 @@
                             <option value="kids">Kids</option>
                         </select>
                     </div>
-                    <div class="form-group col-md-7">
+                    <div class="form-group col">
                         <input type="text" class="form-control" id="searchBar">
                     </div>
-                    <div class="form-group-col-md-2">
+                    <div class="form-group-col">
                         <button class="btn btn-primary" onclick="search()">
                             <i class="fa fa-search"></i> Search
                         </button>
@@ -88,6 +90,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="container-fluid">
+                        <div class="error"></div>
                         <div class="form">
                             <div class="form-group">
                                 <label for="exampleInputEmail1">Email address</label>
@@ -115,6 +118,7 @@
                     <h4 class="modal-title">Register</h4>
                 </div>
                 <div class="modal-body">
+                    <div class="error"></div>
                     <div class="form">
                         <div class="form-group">
                             <label>Username</label>
@@ -146,13 +150,18 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Chat with:
-                        <span id="individual"></span>
+                        <span id="individual"></span> for
+                        <span id="ad"></span>
                     </h4>
                 </div>
                 <div class="modal-body">
                     <div id="chat-message">
-                        <div class="form-group">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
                             <input type="text" class="form-control" id="message">
+                        </div>
+                        <div class="form-group col">
                             <button class="btn btn-primary">
                                 <i class="fa fa-envelope"></i> Send Message
                             </button>
@@ -246,11 +255,9 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/firebase@5.2.0/firebase.js"></script>
     <script defer src="assets/js/jquery.min.js"></script>
     <script defer src="assets/js/popper.min.js"></script>
     <script defer src="assets/js/bootstrap.min.js"></script>
-    <script defer src="assets/js/auth.js"></script>
     <script defer src="assets/js/main.js"></script>
 </body>
 

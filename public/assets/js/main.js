@@ -2,6 +2,7 @@ const auth = firebase.auth();
 const database = firebase.database();
 const storage = firebase.storage();
 const messaging = firebase.messaging();
+const firestore = firebase.firestore();
 var installPromptEvent;
 
 const fileRef = $('input[type=file]#adImage')
@@ -45,7 +46,7 @@ function signUp() {
                 userSignedIn.updateProfile({
                     displayName: username
                 })
-                location.reload();
+                setTimeout(location.reload(),100);
             }).catch((err) => {
                 var errorCode = err.code;
                 var errorMessage = err.message;
@@ -61,7 +62,7 @@ function logIn() {
     let email = document.getElementById('loginEmail').value;
     let password = document.getElementById('loginPassword').value;
     auth.signInWithEmailAndPassword(email, password).then(() => {
-            location.reload();
+            setTimeout(location.reload(),100);
         })
         .catch((err) => {
             var errorCode = err.code;
@@ -79,7 +80,7 @@ function signOut() {
     auth.signOut().then(() => {
         setTimeout(() => {
             location.reload();
-        }, 1000)
+        }, 100)
     }).catch(error => console.error(error));
 }
 
@@ -93,6 +94,7 @@ function changeState() {
                     <a class="nav-link" data-toggle="modal" data-target="#profile">Welcome: ${user.displayName}</a>
                 </div>
                 <a onclick="signOut()" class="btn btn-primary">Sign Out</a>
+                
             `);
             addGroup.html(`<button class="btn btn-primary" data-toggle="modal" data-target="#ad-submit">Add New Advertisement</button>`)
             database.ref('ads').on('value', snapshot => {
@@ -109,13 +111,13 @@ function showPosts(categories = null, searchQuery = null) {
     const postsDiv = $('.container > #posts');
     const adRef = database.ref('ads')
     var adPost = "";
-    if(categories && searchQuery){
+    if(categories && searchQuery || searchQuery){
         adRef.orderByChild('category').equalTo(categories).on('value', snapshot => {
             if (snapshot.exists()) {
                 snapshot.forEach(data => {
                     ad = data.val();
                     if(ad.adName == searchQuery){
-                        adPost += renderAd(data.val());
+                        adPost += renderAd(data.val(), data.key);
                         postsDiv.html(adPost);
                     }
                     else {
@@ -149,7 +151,7 @@ function showPosts(categories = null, searchQuery = null) {
             console.log(snapshot)
             if (snapshot.exists()) {
                 snapshot.forEach(data => {
-                    adPost += renderAd(data.val());
+                    adPost += renderAd(data.val(), data.key);
                     postsDiv.html(adPost);
                 })
             } else {
@@ -169,7 +171,7 @@ function showPosts(categories = null, searchQuery = null) {
         adRef.on('value', snapshot => {
             if (snapshot.exists()) {
                 snapshot.forEach(data => {
-                    adPost += renderAd(data.val());
+                    adPost += renderAd(data.val(), data.key);
                     postsDiv.html(adPost);
                 })
             } else {
@@ -186,13 +188,13 @@ function showPosts(categories = null, searchQuery = null) {
     }
 }
 
-function renderAd(data) {
+function renderAd(data, key) {
     return `
         <div class="card">
             <img class="card-img-top" src="${data.adImage}" alt="Card image cap">
             <div class="card-body">
                 <h1>${data.adName} <span class="badge badge-secondary">${data.pricing} Rs.</span></h1>
-                <small>Made by: ${data.adAuthor}</small>
+                <small>Made by: ${data.adAuthor} <span class="badge badge-primary" data-toggle="modal" data-target="#chat-modal" onclick="startChat('${key}')">Chat Now</span></small>
                 <p>Category: ${data.category}</p>
                 <hr>
                 <p>${data.adDesc}</p>
@@ -251,16 +253,26 @@ function addNewAd() {
     });
 
 }
-
-$("select#categories").change(function() {
-    showPosts($(this).val());
-});
-
+function startChat(adKey) {
+    const chatAdRef = database.ref(`ads/${adKey}`)
+    chatAdRef.once('value', snapshot => {
+        console.log(snapshot.val().adAuthor)
+        $("#individual").html(snapshot.val().adAuthor);
+        $("#ad").html(snapshot.val().adName);
+        if(snapshot.val().authorID === auth.currentUser.uid) {
+            $("#chat-message").html("<p>You can't chat with your own self</p>");
+        }
+    });
+}
 function deletePoll(pid = null) {
     database.ref(`users/${auth.currentUser.uid}/polls/${pid}`).remove();
     database.ref(`polls/${pid}`).remove();
     location.reload();
 }
+
+$("select#categories").change(function() {
+    showPosts($(this).val());
+});
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
@@ -289,4 +301,4 @@ messaging.requestPermission().then(() => {
     console.log("Notification Request has been denied");
 })
 
-changeState();
+window.onload = changeState();

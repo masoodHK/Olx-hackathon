@@ -24,6 +24,10 @@ exports.sendNotification = functions.https.onRequest((res, req) => {
     }
 });
 
-// exports.notifyUser = functions.firestore.document('chats/{chatID}')
-//                         .onWrite((context, change) => {
+// exports.notifyUser = functions.firestore.document('chats/{chatID}').onWrite((context, change)=>{
+    
 // });
+
+exports.createRoom = functions.firestore.document('chats/{chatID}').onCreate((snap,context)=>{
+
+})

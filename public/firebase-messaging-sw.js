@@ -11,7 +11,7 @@ self.addEventListener('push', event => {
     console.log(notification)
     var title = notification.title || 'Yay a message.';
     var body = notification.body || 'We have received a push message.';
-    var icon = '/images/icon-192x192.png';
+    var icon = 'assets/images/icons/icon-192x192.png';
     // var tag = 'simple-push-demo-notification-tag';
     event.waitUntil(
         self.registration.showNotification(title, {
