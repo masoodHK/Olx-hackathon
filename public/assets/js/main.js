@@ -2,7 +2,7 @@ const auth = firebase.auth();
 const database = firebase.database();
 const storage = firebase.storage();
 const messaging = firebase.messaging();
-const firestore = firebase.firestore();
+
 var installPromptEvent;
 
 const fileRef = $('input[type=file]#adImage')
@@ -111,7 +111,7 @@ function showPosts(categories = null, searchQuery = null) {
     const postsDiv = $('.container > #posts');
     const adRef = database.ref('ads')
     var adPost = "";
-    if(categories && searchQuery || searchQuery){
+    if(categories && searchQuery){
         adRef.orderByChild('category').equalTo(categories).on('value', snapshot => {
             if (snapshot.exists()) {
                 snapshot.forEach(data => {
@@ -255,15 +255,68 @@ function addNewAd() {
 }
 function startChat(adKey) {
     const chatAdRef = database.ref(`ads/${adKey}`)
+    let chatRoomName, sellerName, sellerID;
     chatAdRef.once('value', snapshot => {
-        console.log(snapshot.val().adAuthor)
         $("#individual").html(snapshot.val().adAuthor);
         $("#ad").html(snapshot.val().adName);
         if(snapshot.val().authorID === auth.currentUser.uid) {
-            $("#chat-message").html("<p>You can't chat with your own self</p>");
+            $("#chat-message").html("<p>You can't chat with yourself for this ad</p>");
         }
+        sellerName = snapshot.val().adAuthor
+        sellerID = snapshot.val().authorID;
+        chatRoomName = `${snapshot.val().adName}-${auth.currentUser.displayName}`
     });
+    const chatRoomRef = database.ref(`chats/${chatRoomName}`);
+    chatRoomRef.on('value', snapshot => {
+        if(snapshot.exists()){
+            showMessages(chatRoomName);
+        }
+        else {
+            chatRoomRef.set({
+                buyer: auth.currentUser.displayName,
+                buyerID: auth.currentUser.uid,
+                seller: sellerName,
+                sellerID,
+                messages: {}
+            })
+        }
+    })
+    $("#send").on('click', function(){
+        sendMessage(chatRoomName);
+    })
 }
+
+function showMessages(room) {
+    const roomRef = database.ref(`chats/${room}/messages`);
+    let msg = "";
+    $("#chat-message").html(msg);
+    roomRef.on('value', snapshot => {
+        snapshot.forEach(message => {
+            msg += renderMessage(message.val());
+            $("#chat-message").html(msg);
+        })
+    })
+}
+
+function renderMessage(data) {
+    return `<div class="message">
+        <p>${data.message}</p>
+        <small>${data.sender}</small>
+    </div>`
+}
+
+function sendMessage(room) {
+    const roomRef = database.ref(`chats/${room}/messages`);
+    const message = $("#message").val();
+    console.log(message);
+    roomRef.push().set({
+        message,
+        sender: auth.currentUser.displayName,
+        timestamp: Date.now()
+    });
+    document.getElementById("message").value = "";
+}
+
 function deletePoll(pid = null) {
     database.ref(`users/${auth.currentUser.uid}/polls/${pid}`).remove();
     database.ref(`polls/${pid}`).remove();
@@ -294,9 +347,8 @@ messaging.requestPermission().then(() => {
     return messaging.getToken();
 }).then(token => {
     if(auth.currentUser) {
-        database.ref(`users/${auth.currentUser.uid}/token`).set({userToken: token})
+        database.ref(`users/${auth.currentUser.uid}/token`).set(token)
     }
-    console.log(token)
 }).catch(() => {
     console.log("Notification Request has been denied");
 })

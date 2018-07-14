@@ -11,16 +11,15 @@ exports.helloWorld = functions.https.onRequest((request, response) => {
 });
 
 exports.sendNotification = functions.https.onRequest((res, req) => {
-    if (req.body && req.body.token) {
+    if (req.body && req.to) {
         const payload = {
             notification: {
                 title: req.body.title,
                 body: req.body.message,
-                status: 'Wohoo its work',
                 click_action: req.body.url || 'https://example.com'
             }
         }
-        admin.messaging().sendToDevice(req.body.token, payload);
+        admin.messaging().sendToDevice(req.body.to, payload);
     }
 });
 
@@ -28,6 +27,6 @@ exports.sendNotification = functions.https.onRequest((res, req) => {
     
 // });
 
-exports.createRoom = functions.firestore.document('chats/{chatID}').onCreate((snap,context)=>{
+// exports.createRoom = functions.firestore.document('chats/{chatID}').onCreate((snap,context)=>{
 
-})
+// })
