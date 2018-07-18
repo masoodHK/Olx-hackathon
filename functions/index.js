@@ -11,7 +11,7 @@ exports.helloWorld = functions.https.onRequest((request, response) => {
 });
 
 exports.sendNotification = functions.https.onRequest((res, req) => {
-    if (req.body && req.to) {
+    if (req.body && req.body.to) {
         const payload = {
             notification: {
                 title: req.body.title,
@@ -21,6 +21,7 @@ exports.sendNotification = functions.https.onRequest((res, req) => {
         }
         admin.messaging().sendToDevice(req.body.to, payload);
     }
+    res.send(payload);
 });
 
 // exports.notifyUser = functions.firestore.document('chats/{chatID}').onWrite((context, change)=>{

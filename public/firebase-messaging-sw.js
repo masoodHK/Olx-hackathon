@@ -6,9 +6,7 @@ const messaging = firebase.messaging();
 
 self.addEventListener('push', event => {
     console.log('Received a push message', event);
-
     var notification = event.data.json().notification
-    console.log(notification)
     var title = notification.title || 'Yay a message.';
     var body = notification.body || 'We have received a push message.';
     var icon = 'assets/images/icons/icon-192x192.png';

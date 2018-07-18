@@ -39,7 +39,7 @@ function signUp() {
     let username = document.getElementById('username').value;
     let password = document.getElementById('password').value;
     let confirmPassword = document.getElementById('confirm-password').value;
-    if (confirmPassword === password) {
+    if (confirmPassword == password) {
         auth.createUserWithEmailAndPassword(email, password)
             .then(() => {
                 let userSignedIn = auth.currentUser;
@@ -48,12 +48,14 @@ function signUp() {
                 })
                 setTimeout(location.reload(),100);
             }).catch((err) => {
-                var errorCode = err.code;
-                var errorMessage = err.message;
-                if (errorCode === 'auth/weak-password') {
-                    alert("the password is too weak")
-                }
-                console.log(`${err}`)
+                let temp = `
+                <div class="alert alert-danger fade show" role="alert">
+                    ${err.message}
+                </div>`
+                $("#signin .error").html(temp);
+                setTimeout(() => {
+                    $('.alert').alert('close');
+                }, 3000)
             });
     }
 }
@@ -65,14 +67,15 @@ function logIn() {
             setTimeout(location.reload(),100);
         })
         .catch((err) => {
-            var errorCode = err.code;
-            var errorMessage = err.message;
-            if (errorCode) {
-                console.log('Error:' + errorCode);
-            } else {
-                console.log(errorMessage);
-            }
-            console.log(`Error: ${err}`)
+            let temp = `
+            <div class="alert alert-danger fade show" role="alert">
+                ${err.message}
+            </div>`
+            $("#login .error").html(temp);
+            console.log(err)
+            setTimeout(() => {
+                $('.alert').alert('close');
+            }, 3000)
         });
 }
 
@@ -97,9 +100,16 @@ function changeState() {
                 
             `);
             addGroup.html(`<button class="btn btn-primary" data-toggle="modal" data-target="#ad-submit">Add New Advertisement</button>`)
-            database.ref('ads').on('value', snapshot => {
+            database.ref('ads').orderByChild('adAuthor').equalTo(user.displayName).on('value', snapshot => {
                 snapshot.forEach(data => {
                     $('#ads').append(showUsersAds(data.val(),data.key))
+                })
+            })
+            database.ref('chats').on('value', snapshot => {
+                console.log(snapshot.val())
+                snapshot.forEach(data => {
+                    console.log(data.val())
+                    $('#chats').append(showChats(data.val(), data.key))
                 })
             })
         }
@@ -189,18 +199,34 @@ function showPosts(categories = null, searchQuery = null) {
 }
 
 function renderAd(data, key) {
-    return `
-        <div class="card">
-            <img class="card-img-top" src="${data.adImage}" alt="Card image cap">
-            <div class="card-body">
-                <h1>${data.adName} <span class="badge badge-secondary">${data.pricing} Rs.</span></h1>
-                <small>Made by: ${data.adAuthor} <span class="badge badge-primary" data-toggle="modal" data-target="#chat-modal" onclick="startChat('${key}')">Chat Now</span></small>
-                <p>Category: ${data.category}</p>
-                <hr>
-                <p>${data.adDesc}</p>
+    if(auth.currentUser == null || data.authorID == auth.currentUser.uid) {
+        return `
+            <div class="card">
+                <img class="card-img-top" src="${data.adImage}" alt="Card image cap">
+                <div class="card-body">
+                    <h1>${data.adName} <span class="badge badge-secondary">${data.pricing} Rs.</span></h1>
+                    <small>Made by: ${data.adAuthor}</small>
+                    <p>Category: ${data.category}</p>
+                    <hr>
+                    <p>${data.adDesc}</p>
+                </div>
             </div>
-        </div>
-    `
+        `
+    }
+    else {
+        return `
+            <div class="card">
+                <img class="card-img-top" src="${data.adImage}" alt="Card image cap">
+                <div class="card-body">
+                    <h1>${data.adName} <span class="badge badge-secondary">${data.pricing} Rs.</span></h1>
+                    <small>Made by: ${data.adAuthor} <span class="badge badge-primary" data-toggle="modal" data-target="#chat-modal" onclick="startChat('${key}')">Chat Now</span></small>
+                    <p>Category: ${data.category}</p>
+                    <hr>
+                    <p>${data.adDesc}</p>
+                </div>
+            </div>
+        `
+    }
 }
 
 function search() {
@@ -214,6 +240,14 @@ function showUsersAds(data, key) {
         <tr>
             <td>${data.adName}</td>
             <td><button class="btn btn-danger" onclick="deleteAdPost('${key}')">Delete this ad</button></td>
+        </tr>
+    `
+}
+function showChats(data, key) {
+    return `
+        <tr>
+            <td>${key}</td>
+            <td><button class="btn btn-danger" data-toggle="modal" data-target="#chat-modal" onclick="startChat('${data.adKey}','${key}')">Delete this ad</button></td>
         </tr>
     `
 }
@@ -253,23 +287,39 @@ function addNewAd() {
     });
 
 }
-function startChat(adKey) {
+function startChat(adKey, chatName = null) {
     const chatAdRef = database.ref(`ads/${adKey}`)
-    let chatRoomName, sellerName, sellerID;
-    chatAdRef.once('value', snapshot => {
-        $("#individual").html(snapshot.val().adAuthor);
-        $("#ad").html(snapshot.val().adName);
-        if(snapshot.val().authorID === auth.currentUser.uid) {
-            $("#chat-message").html("<p>You can't chat with yourself for this ad</p>");
-        }
-        sellerName = snapshot.val().adAuthor
-        sellerID = snapshot.val().authorID;
-        chatRoomName = `${snapshot.val().adName}-${auth.currentUser.displayName}`
-    });
-    const chatRoomRef = database.ref(`chats/${chatRoomName}`);
+    let chatRoomRef;
+    let chatRoomName, sellerName, sellerID, receiverToken, adName;
+    if(chatName) {
+        database.ref(`chats/${chatName}`).once('value', snapshot => {
+            $("#ad").html(snapshot.val().adName);
+            sellerName = snapshot.val().seller
+            sellerID = snapshot.val().sellerID;
+        });
+        chatRoomName = chatName;
+        chatRoomRef = database.ref(`chats/${chatName}`);
+    }
+    else {
+        chatAdRef.once('value', snapshot => {
+            $("#ad").html(snapshot.val().adName);
+            sellerName = snapshot.val().adAuthor
+            sellerID = snapshot.val().authorID;
+            adName = snapshot.val().adName;
+            chatRoomName = `${snapshot.val().adName}-${auth.currentUser.displayName}`
+        });
+        chatRoomRef = database.ref(`chats/${chatRoomName}`);
+    }
     chatRoomRef.on('value', snapshot => {
-        if(snapshot.exists()){
-            showMessages(chatRoomName);
+        if(snapshot.exists()){                    
+            if(snapshot.val().seller == auth.currentUser.displayName) {
+                $("#individual").html(snapshot.val().buyer)
+                receiverToken = retreiveToken(snapshot.val().buyerID)
+            }
+            else {
+                $("#individual").html(snapshot.val().seller);
+                receiverToken = retreiveToken(snapshot.val().sellerID)
+            }
         }
         else {
             chatRoomRef.set({
@@ -277,13 +327,17 @@ function startChat(adKey) {
                 buyerID: auth.currentUser.uid,
                 seller: sellerName,
                 sellerID,
+                adKey,
+                adName,
                 messages: {}
             })
         }
     })
+    showMessages(chatRoomName);
     $("#send").on('click', function(){
-        sendMessage(chatRoomName);
-    })
+        sendMessage(chatRoomName, receiverToken);
+    });
+    
 }
 
 function showMessages(room) {
@@ -298,6 +352,14 @@ function showMessages(room) {
     })
 }
 
+function retreiveToken(uid) {
+    let token;
+    database.ref(`users/${uid}/token`).on('value', snapshot => {
+        token = snapshot.val();
+    });
+    return token;
+}
+
 function renderMessage(data) {
     return `<div class="message">
         <p>${data.message}</p>
@@ -305,16 +367,29 @@ function renderMessage(data) {
     </div>`
 }
 
-function sendMessage(room) {
+function sendMessage(room, token) {
     const roomRef = database.ref(`chats/${room}/messages`);
     const message = $("#message").val();
-    console.log(message);
     roomRef.push().set({
         message,
         sender: auth.currentUser.displayName,
         timestamp: Date.now()
     });
     document.getElementById("message").value = "";
+    fetch("https://fcm.googleapis.com/fcm/send", {
+        "method": "POST",
+        'headers': {
+            'Authorization': 'key=' + KEY,
+            'Content-Type': 'application/json'
+        },
+        "body": {
+            'notification': {
+                'title': "New message",
+                'message': message,
+            },
+            "to": token,
+        }
+    }).then(res => console.log(res)).catch(err => console.log(err))
 }
 
 function deletePoll(pid = null) {
@@ -351,6 +426,10 @@ messaging.requestPermission().then(() => {
     }
 }).catch(() => {
     console.log("Notification Request has been denied");
+})
+
+messaging.onMessage(payload => {
+    console.log(payload)
 })
 
 window.onload = changeState();
