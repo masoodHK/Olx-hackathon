@@ -88,7 +88,7 @@ function signOut() {
 }
 
 function changeState() {
-    const nav = $('form.form-inline.ml-auto');
+    const nav = $('.inline.ml-auto');
     const addGroup = $('#addNewPost > .container')
     auth.onAuthStateChanged(user => {
         if (user) {
@@ -100,12 +100,12 @@ function changeState() {
                 
             `);
             addGroup.html(`<button class="btn btn-primary" data-toggle="modal" data-target="#ad-submit">Add New Advertisement</button>`)
-            database.ref('ads').orderByChild('adAuthor').equalTo(user.displayName).on('value', snapshot => {
+            database.ref('ads').orderByChild('adAuthor').equalTo(user.displayName).once('value', snapshot => {
                 snapshot.forEach(data => {
                     $('#ads').append(showUsersAds(data.val(),data.key))
                 })
             })
-            database.ref('chats').on('value', snapshot => {
+            database.ref('chats').once('value', snapshot => {
                 console.log(snapshot.val())
                 snapshot.forEach(data => {
                     console.log(data.val())
@@ -123,6 +123,40 @@ function showPosts(categories = null, searchQuery = null) {
     var adPost = "";
     if(categories && searchQuery){
         adRef.orderByChild('category').equalTo(categories).on('value', snapshot => {
+            if (snapshot.exists()) {
+                snapshot.forEach(data => {
+                    ad = data.val();
+                    if(ad.adName == searchQuery){
+                        adPost += renderAd(data.val(), data.key);
+                        postsDiv.html(adPost);
+                    }
+                    else {
+                        document.getElementById('posts').innerHTML = "";
+                        postsDiv.html(`
+                            <div class="text-center">        
+                                <h3>Nothing to show here</h3>
+                                <p>Please try again later......
+                                    <i class="fa fa-sad-tear"></i>
+                                </p>
+                            </div>
+                        `)
+                    }
+                })
+            } else {
+                document.getElementById('posts').innerHTML = "";
+                postsDiv.html(`
+                    <div class="text-center">        
+                        <h3>Nothing to show here</h3>
+                        <p>Please try again later......
+                            <i class="fa fa-sad-tear"></i>
+                        </p>
+                    </div>
+                `)
+            }
+        })
+    }
+    else if(searchQuery) {
+        adRef.on('value', snapshot => {
             if (snapshot.exists()) {
                 snapshot.forEach(data => {
                     ad = data.val();
@@ -247,7 +281,7 @@ function showChats(data, key) {
     return `
         <tr>
             <td>${key}</td>
-            <td><button class="btn btn-danger" data-toggle="modal" data-target="#chat-modal" onclick="startChat('${data.adKey}','${key}')">Delete this ad</button></td>
+            <td><button class="btn btn-default" data-toggle="modal" data-target="#chat-modal" onclick="startChat('${data.adKey}','${key}')">Start Chat</button></td>
         </tr>
     `
 }
@@ -314,11 +348,15 @@ function startChat(adKey, chatName = null) {
         if(snapshot.exists()){                    
             if(snapshot.val().seller == auth.currentUser.displayName) {
                 $("#individual").html(snapshot.val().buyer)
-                receiverToken = retreiveToken(snapshot.val().buyerID)
+                retreiveToken(snapshot.val().buyerID).then(token => {
+                    receiverToken = token;
+                })
             }
             else {
                 $("#individual").html(snapshot.val().seller);
-                receiverToken = retreiveToken(snapshot.val().sellerID)
+                retreiveToken(snapshot.val().sellerID).then(token => {
+                    receiverToken = token;
+                })
             }
         }
         else {
@@ -353,11 +391,14 @@ function showMessages(room) {
 }
 
 function retreiveToken(uid) {
-    let token;
-    database.ref(`users/${uid}/token`).on('value', snapshot => {
-        token = snapshot.val();
-    });
-    return token;
+    return new Promise((resolve) => {
+        let token;
+        database.ref(`users/${uid}/token`).once('value', snapshot => {
+            token = snapshot.val();
+            return resolve(token);
+        });
+    })
+
 }
 
 function renderMessage(data) {
@@ -367,7 +408,7 @@ function renderMessage(data) {
     </div>`
 }
 
-function sendMessage(room, token) {
+function sendMessage(room, to) {
     const roomRef = database.ref(`chats/${room}/messages`);
     const message = $("#message").val();
     roomRef.push().set({
@@ -379,16 +420,16 @@ function sendMessage(room, token) {
     fetch("https://fcm.googleapis.com/fcm/send", {
         "method": "POST",
         'headers': {
-            'Authorization': 'key=' + KEY,
+            'Authorization': 'key=' + "AAAAfikNQes:APA91bHT7x5_naR3cfAPLupEL-RA-CroCS37vUsKVCybeui41vr15I1HJFis84_OpEGrk97852ngjUZWFWBnctO3eQmBGb2jt_2y86t4HE3eyz7qgtL0Pxx5JFgfsoEa7MOH6LH6HvVkqIbsQiozQhUoxxmJP2LPYA",
             'Content-Type': 'application/json'
         },
-        "body": {
+        "body": JSON.stringify({
             'notification': {
-                'title': "New message",
-                'message': message,
+                'title':"New Message",
+                'message': message
             },
-            "to": token,
-        }
+            "to": to
+        })
     }).then(res => console.log(res)).catch(err => console.log(err))
 }
 
