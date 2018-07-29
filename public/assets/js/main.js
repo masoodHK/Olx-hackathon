@@ -88,6 +88,9 @@ function signOut() {
 }
 
 function changeState() {
+    setTimeout(() => {
+        document.getElementById('loader').style.display = "none";
+    }, 2000);
     const nav = $('.inline.ml-auto');
     const addGroup = $('#addNewPost > .container')
     auth.onAuthStateChanged(user => {
@@ -267,6 +270,7 @@ function search() {
     let searchQuery = document.getElementById("searchBar").value
     let category = document.getElementById("categories").value
     showPosts(category, searchQuery);
+    searchQuery = "";
 }
 
 function showUsersAds(data, key) {
@@ -425,8 +429,8 @@ function sendMessage(room, to) {
         },
         "body": JSON.stringify({
             'notification': {
-                'title':"New Message",
-                'body': "test",
+                'title':`${auth.currentUser.displayName} for ad: ${room.slice(0, room.indexOf('-'))}`,
+                'body': message,
 				'icon': 'assets/images/icons/icon-192x192.png'
             },
             "to": to
@@ -438,6 +442,23 @@ function deletePoll(pid = null) {
     database.ref(`users/${auth.currentUser.uid}/polls/${pid}`).remove();
     database.ref(`polls/${pid}`).remove();
     location.reload();
+}
+
+function updateUI(worker) {
+    let userUpdate = confirm("A new update is released.\n Do you wanna apply it now or later")
+    if(userUpdate != true) {
+        return
+    }
+    worker.postMessage({action: 'skipWaiting'});
+    setTimeout(location.reload(), 1000);
+}
+
+function trackUpdates(worker) {
+    worker.addEventListener('statechange', () => {
+        if(worker.state == "installed") {
+            updateUI(worker);
+        }
+    })
 }
 
 function renderNotification (data) {
@@ -462,11 +483,19 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
         .then(reg => {
             console.log(`Service Worker Scope: ${reg.scope}`);
+            reg.addEventListener('updatefound', () => {
+                trackUpdates(reg.installing)
+            })
+            if(reg.installing) {
+                trackUpdates(reg.installing)
+                return
+            }
+            if(reg.waiting) {
+                updateUI(reg.waiting);
+                return;
+            }
         })
         .catch(error => console.log(error));
-    navigator.serviceWorker.ready.then(function(reg) {
-        reg.sync.register('dataSync');
-    });
 }
 
 window.addEventListener('beforeinstallprompt', function(event) {

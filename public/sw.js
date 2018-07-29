@@ -1,4 +1,4 @@
-const cacheVersion = "v1.4";
+const cacheVersion = "v1.5.4";
 const cacheName = `app-olx-${cacheVersion}`;
 const files = [
   "index.html",
@@ -15,7 +15,6 @@ const files = [
 
 self.addEventListener("install", event => {
   event.waitUntil(precache());
-  self.skipWaiting();
 });
 
 self.addEventListener("activate", event => {
@@ -51,7 +50,11 @@ self.addEventListener('fetch', event => {
       )
   }
 });
-
+self.addEventListener('message', function(event) {
+  if (event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
 
 function deleteKeys() {
   return caches.keys().then(keys =>
