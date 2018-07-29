@@ -420,13 +420,14 @@ function sendMessage(room, to) {
     fetch("https://fcm.googleapis.com/fcm/send", {
         "method": "POST",
         'headers': {
-            'Authorization': 'key=' + "AAAAfikNQes:APA91bHT7x5_naR3cfAPLupEL-RA-CroCS37vUsKVCybeui41vr15I1HJFis84_OpEGrk97852ngjUZWFWBnctO3eQmBGb2jt_2y86t4HE3eyz7qgtL0Pxx5JFgfsoEa7MOH6LH6HvVkqIbsQiozQhUoxxmJP2LPYA",
+            'Authorization': 'key=' + KEY,
             'Content-Type': 'application/json'
         },
         "body": JSON.stringify({
             'notification': {
                 'title':"New Message",
-                'message': message
+                'body': "test",
+				'icon': 'assets/images/icons/icon-192x192.png'
             },
             "to": to
         })
@@ -439,13 +440,29 @@ function deletePoll(pid = null) {
     location.reload();
 }
 
+function renderNotification (data) {
+    return `
+        <div class="notification">
+            <div class="image">
+                <img src="${data.icon}">
+            </div>
+            <div class="data">
+                <h5>${data.title}</h5>
+                <p>${data.body}</p>
+            </div>
+        </div>
+    `
+}
+
 $("select#categories").change(function() {
     showPosts($(this).val());
 });
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log(`Service Worker Scope: ${reg.scope}`))
+        .then(reg => {
+            console.log(`Service Worker Scope: ${reg.scope}`);
+        })
         .catch(error => console.log(error));
     navigator.serviceWorker.ready.then(function(reg) {
         reg.sync.register('dataSync');
@@ -459,7 +476,13 @@ window.addEventListener('beforeinstallprompt', function(event) {
 });
 
 messaging.requestPermission().then(() => {
-    console.log("Notification Request has been granted");
+    const push = new Notification("Notification Request has been granted", {
+        body: "You can now receive notifications",
+        icon: "assets/images/icons/icon-192x192.png"
+    });
+    setTimeout(() => {
+        push.close()
+    }, 5000);
     return messaging.getToken();
 }).then(token => {
     if(auth.currentUser) {
@@ -470,7 +493,11 @@ messaging.requestPermission().then(() => {
 })
 
 messaging.onMessage(payload => {
-    console.log(payload)
+    console.log(payload.notification)
+    $('#toast-notifications').append(renderNotification(payload.notification)).fadeIn();
+    setTimeout(() => {
+        $('#toast-notifications').empty().fadeOut();
+    }, 10000)
 })
 
 window.onload = changeState();

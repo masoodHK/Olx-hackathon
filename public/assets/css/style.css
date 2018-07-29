@@ -137,3 +137,25 @@ nav >.container {
   overflow-y: scroll;
   margin-bottom: 10px;
 }
+#toast-notifications {
+  position: absolute;
+  bottom: 10px;
+  left: 20px;
+}
+.notification {
+  display: flex;
+  background: #dddddd;
+  box-shadow: 2px 9px 18px #1b1b1bab;
+  width: 95%;
+  margin-top: 5px;
+}
+#toast-notifications > div > div.image {
+  width: 38%;
+  padding: 10px 0 10px 11px;
+}
+#toast-notifications > div > div.image > img {
+  width: 60%;
+}
+#toast-notifications > div > div.data {
+  padding: 10px;
+}

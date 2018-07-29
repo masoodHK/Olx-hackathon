@@ -1,4 +1,4 @@
-const cacheVersion = "v1.3.9";
+const cacheVersion = "v1.4";
 const cacheName = `app-olx-${cacheVersion}`;
 const files = [
   "index.html",
@@ -26,6 +26,15 @@ self.addEventListener('fetch', event => {
   var req = event.request;
   console.log('[Service Worker] Fetcting', req);
   let link = new URL(req.url);
+  if(req.url.includes("https://firebasestorage.googleapis.com/v0/b/olx-hackathon.appspot.com/o/adImages")){
+      event.respondWith(fetch(req.url, {
+        "mode": "no-cors"
+      }).catch(() => {
+        return caches.match('assets/images/placeholder.png')
+      }));
+      console.log(req.url);
+      return
+  }
   if (link.origin === location.origin) {
       event.respondWith(
           caches.open(cacheName).then(function (cache) {
@@ -62,11 +71,3 @@ function precache() {
     return cache.addAll(files);
   });
 }
-// function updateCache(request) {
-//     return caches.open(cacheName).then(function (cache) {
-//         return fetch(request).then(function (response) {
-//             console.log(response);
-//             return cache.put(request, response);
-//         });
-//     });
-// }
