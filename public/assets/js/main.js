@@ -3,10 +3,38 @@ const database = firebase.database();
 const storage = firebase.storage();
 const messaging = firebase.messaging();
 
-var installPromptEvent;
+const adsStore = localforage.createInstance({
+    name: 'ads'
+})
+const offlineAdsStore = localforage.createInstance({
+    name: 'offline-ads'
+})
+adsStore.ready().then((result) => {
+    console.log(adsStore.driver(), result)
+}).catch((err) => {
+    console.log(err)
+});
 
+offlineAdsStore.ready().then((result) => {
+    console.log(offlineAdsStore.driver(), result)
+}).catch((err) => {
+    console.log(err)
+});
 const fileRef = $('input[type=file]#adImage')
 let fileName;
+
+const categoryTranslator = {
+    "clothings": "Clothings",
+    "mobile-phones": "Mobile Phones and Accessories",
+    "home-ownership": "Home Ownership or Rental",
+    "jobs": "Jobs",
+    "retail-stores": "Retail Store or Ownership",
+    "vehicles": "Vehicles",
+    "home-decor": "Home Decorations and Accessories",
+    "animals": "Animals or Pet Ownerships",
+    "beauty-products": "Beauty Products",
+    "kids": "Kids",
+}
 
 fileRef.on('change', function(event) {
     var file = event.target.files;
@@ -39,6 +67,16 @@ function signUp() {
     let username = document.getElementById('username').value;
     let password = document.getElementById('password').value;
     let confirmPassword = document.getElementById('confirm-password').value;
+    if (username.length <= 0) {
+        let temp = `
+        <div class="alert alert-danger fade show" role="alert">
+            Username is empty.
+        </div>`
+        $("#signin .error").html(temp);
+        setTimeout(() => {
+            $('.alert').alert('close');
+        }, 5000)
+    }
     if (confirmPassword == password) {
         auth.createUserWithEmailAndPassword(email, password)
             .then(() => {
@@ -55,7 +93,7 @@ function signUp() {
                 $("#signin .error").html(temp);
                 setTimeout(() => {
                     $('.alert').alert('close');
-                }, 3000)
+                }, 5000)
             });
     }
 }
@@ -75,7 +113,7 @@ function logIn() {
             console.log(err)
             setTimeout(() => {
                 $('.alert').alert('close');
-            }, 3000)
+            }, 5000)
         });
 }
 
@@ -88,10 +126,9 @@ function signOut() {
 }
 
 function changeState() {
-    setTimeout(() => {
-        document.getElementById('loader').style.display = "none";
-    }, 2000);
-    const nav = $('.inline.ml-auto');
+    const nav = $('.form-inline.ml-auto');
+    const display_name = $("#display-name")
+    const email = $("#email-address")
     const addGroup = $('#addNewPost > .container')
     auth.onAuthStateChanged(user => {
         if (user) {
@@ -100,8 +137,9 @@ function changeState() {
                     <a class="nav-link" data-toggle="modal" data-target="#profile">Welcome: ${user.displayName}</a>
                 </div>
                 <a onclick="signOut()" class="btn btn-primary">Sign Out</a>
-                
             `);
+            display_name.html(user.displayName)
+            email.html(user.email)
             addGroup.html(`<button class="btn btn-primary" data-toggle="modal" data-target="#ad-submit">Add New Advertisement</button>`)
             database.ref('ads').orderByChild('adAuthor').equalTo(user.displayName).once('value', snapshot => {
                 snapshot.forEach(data => {
@@ -115,26 +153,47 @@ function changeState() {
                     $('#chats').append(showChats(data.val(), data.key))
                 })
             })
+            grantNotificationRequest()
+            messaging.onTokenRefresh(handleTokens());
         }
     });
     showPosts()
+    setTimeout(() => {
+        document.getElementById('loader').style.display = "none";
+    }, 5000);
 }
 
 function showPosts(categories = null, searchQuery = null) {
     const postsDiv = $('.container > #posts');
     const adRef = database.ref('ads')
     var adPost = "";
+    adRef.on('value', snapshot => {
+        if (snapshot.exists()) {
+            snapshot.forEach(data => {
+                adsStore.setItem(data.key, data.val()).catch(err => console.log(err));
+            })
+        } else {
+            postsDiv.html("" + `
+                <div class="text-center">        
+                    <h3>Nothing to show here</h3>
+                    <p>Please try again later......
+                        <i class="fa fa-sad-tear"></i>
+                    </p>
+                </div>
+            `)
+        }
+    });
     if(categories && searchQuery){
         adRef.orderByChild('category').equalTo(categories).on('value', snapshot => {
             if (snapshot.exists()) {
                 snapshot.forEach(data => {
-                    ad = data.val();
                     if(ad.adName == searchQuery){
-                        adPost += renderAd(data.val(), data.key);
-                        postsDiv.html(adPost);
+                        adsStore.getItem(data.key).then(result => {
+                            adPost += renderAd(result, data.key);
+                            postsDiv.html(adPost);
+                        })
                     }
-                    else {
-                        document.getElementById('posts').innerHTML = "";
+                    else {;
                         postsDiv.html(`
                             <div class="text-center">        
                                 <h3>Nothing to show here</h3>
@@ -159,47 +218,25 @@ function showPosts(categories = null, searchQuery = null) {
         })
     }
     else if(searchQuery) {
-        adRef.on('value', snapshot => {
-            if (snapshot.exists()) {
-                snapshot.forEach(data => {
-                    ad = data.val();
-                    if(ad.adName == searchQuery){
-                        adPost += renderAd(data.val(), data.key);
+        adsStore.keys().then(keys => {
+            keys.forEach(key => {
+                adsStore.getItem(key).then(data => {
+                    if(data.adName === searchQuery) {
+                        adPost += renderAd(data, key);
                         postsDiv.html(adPost);
                     }
-                    else {
-                        document.getElementById('posts').innerHTML = "";
-                        postsDiv.html(`
-                            <div class="text-center">        
-                                <h3>Nothing to show here</h3>
-                                <p>Please try again later......
-                                    <i class="fa fa-sad-tear"></i>
-                                </p>
-                            </div>
-                        `)
-                    }
                 })
-            } else {
-                document.getElementById('posts').innerHTML = "";
-                postsDiv.html(`
-                    <div class="text-center">        
-                        <h3>Nothing to show here</h3>
-                        <p>Please try again later......
-                            <i class="fa fa-sad-tear"></i>
-                        </p>
-                    </div>
-                `)
-            }
-        })
+            });
+        });
     }
     else if(categories){
-        console.log(categories)
         adRef.orderByChild('category').equalTo(categories).on('value', snapshot => {
-            console.log(snapshot)
             if (snapshot.exists()) {
                 snapshot.forEach(data => {
-                    adPost += renderAd(data.val(), data.key);
-                    postsDiv.html(adPost);
+                    adsStore.getItem(data.key).then(result => {
+                        adPost += renderAd(result, data.key);
+                        postsDiv.html(adPost);
+                    })
                 })
             } else {
                 document.getElementById('posts').innerHTML = "";
@@ -215,55 +252,87 @@ function showPosts(categories = null, searchQuery = null) {
         })
     }
     else{
-        adRef.on('value', snapshot => {
-            if (snapshot.exists()) {
-                snapshot.forEach(data => {
-                    adPost += renderAd(data.val(), data.key);
+        adsStore.keys().then(keys => {
+            keys.forEach(key => {
+                adsStore.getItem(key).then(data => {
+                    adPost += renderAd(data, key);
                     postsDiv.html(adPost);
                 })
-            } else {
-                postsDiv.html("" + `
-                    <div class="text-center">        
-                        <h3>Nothing to show here</h3>
-                        <p>Please try again later......
-                            <i class="fa fa-sad-tear"></i>
-                        </p>
-                    </div>
-                `)
-            }
+            });
         });
     }
+    setTimeout(() => {
+        let images = $('img.card-img-top');
+        for (let i = 0; i < images.length; i++) {
+            images[i].src = images[i].getAttribute('data-src')
+            images[i].removeAttribute('data-src')
+        }
+    }, 5000)
 }
 
 function renderAd(data, key) {
-    if(auth.currentUser == null || data.authorID == auth.currentUser.uid) {
+    if(auth.currentUser == null) {
         return `
             <div class="card">
-                <img class="card-img-top" src="${data.adImage}" alt="Card image cap">
+                <img class="card-img-top" src="assets/images/placeholder.png" data-src="${data.adImage}">
                 <div class="card-body">
                     <h1>${data.adName} <span class="badge badge-secondary">${data.pricing} Rs.</span></h1>
                     <small>Made by: ${data.adAuthor}</small>
-                    <p>Category: ${data.category}</p>
+                    <p>Category: ${categoryTranslator[data.category]}</p>
                     <hr>
                     <p>${data.adDesc}</p>
+                </div>
+            </div>
+        `
+    }
+    else if (data.authorID == auth.currentUser.uid) {
+        return `
+            <div class="card ${checkFavorite(key)}">
+                <img class="card-img-top" src="assets/images/placeholder.png" data-src="${data.adImage}">
+                <div class="card-body">
+                    <h1>${data.adName} <span class="badge badge-secondary">${data.pricing} Rs.</span></h1>
+                    <small>Made by: ${data.adAuthor}</small>
+                    <p>Category: ${categoryTranslator[data.category]}</p>
+                    <hr>
+                    <p>${data.adDesc}</p>
+                </div>
+                <div class="card-footer">
+                    <button class="btn" onclick="setAdAsYourFavorite('${key}', this)">Mark as favorite</button>
+                    <button class="btn" onclick="saveOffline('${key}')">Save for offline</button>
                 </div>
             </div>
         `
     }
     else {
         return `
-            <div class="card">
-                <img class="card-img-top" src="${data.adImage}" alt="Card image cap">
+            <div class="card ${checkFavorite(key)}">
+                <img class="card-img-top" src="assets/images/placeholder.png" data-src="${data.adImage}">
                 <div class="card-body">
                     <h1>${data.adName} <span class="badge badge-secondary">${data.pricing} Rs.</span></h1>
-                    <small>Made by: ${data.adAuthor} <span class="badge badge-primary" data-toggle="modal" data-target="#chat-modal" onclick="startChat('${key}')">Chat Now</span></small>
-                    <p>Category: ${data.category}</p>
+                    <small>Made by: ${data.adAuthor}</small>
+                    <p>Category: ${categoryTranslator[data.category]}</p>
                     <hr>
                     <p>${data.adDesc}</p>
                 </div>
+                <div class="card-footer">
+                    <button class="btn" data-toggle="modal" data-target="#chat-modal" onclick="startChat('${auth.currentUser.displayName}-${data.adAuthor}', '${data.adAuthor}', '${data.authorID}')">Chat Now</button>
+                    <button class="btn" onclick="setAdAsYourFavorite('${key}', this)">Mark as favorite</button>
+                    <button class="btn" onclick="saveOffline('${key}')">Save for offline</button>
+            </div>
             </div>
         `
     }
+}
+
+function checkFavorite(key) {
+    let res = ""
+    database.ref(`users/${auth.currentUser.uid}/ads/favorites/${key}`)
+        .on('value', snapshot => {
+            if(snapshot.exists()){
+                res = snapshot.val() ? "favorite" : "";
+            }
+        })
+    return res;
 }
 
 function search() {
@@ -282,17 +351,51 @@ function showUsersAds(data, key) {
     `
 }
 function showChats(data, key) {
+    if(data.buyer === auth.currentUser.displayName) {
     return `
         <tr>
-            <td>${key}</td>
-            <td><button class="btn btn-default" data-toggle="modal" data-target="#chat-modal" onclick="startChat('${data.adKey}','${key}')">Start Chat</button></td>
+            <td>${data.seller}</td>
+            <td><button class="btn btn-default" data-toggle="modal" data-target="#chat-modal" onclick="startChat('${key}')">Start Chat</button></td>
         </tr>
     `
+}
+    else {
+        return `
+            <tr>
+                <td>${data.buyer}</td>
+                <td><button class="btn btn-default" data-toggle="modal" data-target="#chat-modal" onclick="startChat('${key}')">Start Chat</button></td>
+            </tr>
+        `
+    }
+}
+
+function setAdAsYourFavorite(key, element) {
+    $(element).parent().parent().attr('class', 'favorite');
+    database.ref(`users/${auth.currentUser.uid}/ads/favorites/${key}`).set(true);
+    sendNotification({
+        'title':`Success`,
+        'body': "The advertisement has been added to your favorites",
+        'icon': 'assets/images/icons/icon-192x192.png'
+    })
+}
+
+function saveOffline(key) {
+    console.log(key)
+    adsStore.getItem(key).then(res => {
+        offlineAdsStore.setItem(key, res).then(() => {
+            sendNotification({
+                'title':`Success`,
+                'body': "The advertisement has been saved offline",
+                'icon': 'assets/images/icons/icon-192x192.png'
+            })
+        })
+    })
 }
 
 function deleteAdPost(key) {
     database.ref(`ads/${key}`).remove();
     database.ref(`users/${auth.currentUser.uid}/ads/${key}`).remove();
+    adsStore.removeItem(key).then(res => console.log(res))
     location.reload();
 }
 
@@ -306,9 +409,12 @@ function addNewAd() {
     let adAuthor = auth.currentUser.displayName;
     let adImage;
 
-    imageRef.putString(imageURL, 'data_url').then(() => {
-        imageRef.getDownloadURL().then((url) => {
+    imageRef.putString(imageURL, 'data_url').then((snapshot) => {
+        console.log(snapshot)
+        firebase.storage().ref().child(`adImages/${fileName}`).getDownloadURL().then((url) => {
+           console.log(url)
             adImage = url;
+            console.log(adImage)
             let adPost = {
                 adName,
                 category,
@@ -321,34 +427,14 @@ function addNewAd() {
             database.ref(`users/${auth.currentUser.uid}/ads`).push().set(true);
             database.ref(`ads`).push().set(adPost);
             location.reload();
-        })
-    });
+        }).catch(error => console.log(error))
+    }).catch(error => console.log(error));
 
 }
-function startChat(adKey, chatName = null) {
-    const chatAdRef = database.ref(`ads/${adKey}`)
-    let chatRoomRef;
-    let chatRoomName, sellerName, sellerID, receiverToken, adName;
-    if(chatName) {
-        database.ref(`chats/${chatName}`).once('value', snapshot => {
-            $("#ad").html(snapshot.val().adName);
-            sellerName = snapshot.val().seller
-            sellerID = snapshot.val().sellerID;
-        });
-        chatRoomName = chatName;
-        chatRoomRef = database.ref(`chats/${chatName}`);
-    }
-    else {
-        chatAdRef.once('value', snapshot => {
-            $("#ad").html(snapshot.val().adName);
-            sellerName = snapshot.val().adAuthor
-            sellerID = snapshot.val().authorID;
-            adName = snapshot.val().adName;
-            chatRoomName = `${snapshot.val().adName}-${auth.currentUser.displayName}`
-        });
-        chatRoomRef = database.ref(`chats/${chatRoomName}`);
-    }
-    chatRoomRef.on('value', snapshot => {
+function startChat(key, receiver = null, receiverKey = null) {
+    let receiverToken;
+    let chatRoomRef = database.ref(`chats/${key}`);
+    chatRoomRef.once('value', snapshot => {
         if(snapshot.exists()){                    
             if(snapshot.val().seller == auth.currentUser.displayName) {
                 $("#individual").html(snapshot.val().buyer)
@@ -367,30 +453,34 @@ function startChat(adKey, chatName = null) {
             chatRoomRef.set({
                 buyer: auth.currentUser.displayName,
                 buyerID: auth.currentUser.uid,
-                seller: sellerName,
-                sellerID,
-                adKey,
-                adName,
+                seller: receiver,
+                sellerID: receiverKey,
                 messages: {}
             })
+            $("#individual").html(receiver);
+            retreiveToken(receiverKey).then(token => {
+                receiverToken = token;
+            })
+            
         }
     })
-    showMessages(chatRoomName);
+    console.log(key);
+    showMessages(key);
     $("#send").on('click', function(){
-        sendMessage(chatRoomName, receiverToken);
+        sendMessage(key, receiverToken);
     });
-    
 }
 
 function showMessages(room) {
+    console.log(room);
     const roomRef = database.ref(`chats/${room}/messages`);
     let msg = "";
     $("#chat-message").html(msg);
-    roomRef.on('value', snapshot => {
-        snapshot.forEach(message => {
-            msg += renderMessage(message.val());
-            $("#chat-message").html(msg);
-        })
+    roomRef.on('child_added', snapshot => {
+        console.log(snapshot.val().timestamp)
+        msg += renderMessage(snapshot.val());
+        $("#chat-message").html(msg);
+        $('#chat-message').scrollTop($('#chat-message').height())
     })
 }
 
@@ -402,17 +492,17 @@ function retreiveToken(uid) {
             return resolve(token);
         });
     })
-
 }
 
 function renderMessage(data) {
     return `<div class="message">
         <p>${data.message}</p>
-        <small>${data.sender}</small>
+        <small>${data.sender}: Sent on: ${(new Date(data.timestamp)).toLocaleString()}</small>
     </div>`
 }
 
 function sendMessage(room, to) {
+    console.log(room)
     const roomRef = database.ref(`chats/${room}/messages`);
     const message = $("#message").val();
     roomRef.push().set({
@@ -429,19 +519,13 @@ function sendMessage(room, to) {
         },
         "body": JSON.stringify({
             'notification': {
-                'title':`${auth.currentUser.displayName} for ad: ${room.slice(0, room.indexOf('-'))}`,
+                'title':`New Message from ${auth.currentUser.displayName}`,
                 'body': message,
 				'icon': 'assets/images/icons/icon-192x192.png'
             },
             "to": to
         })
     }).then(res => console.log(res)).catch(err => console.log(err))
-}
-
-function deletePoll(pid = null) {
-    database.ref(`users/${auth.currentUser.uid}/polls/${pid}`).remove();
-    database.ref(`polls/${pid}`).remove();
-    location.reload();
 }
 
 function updateUI(worker) {
@@ -455,7 +539,7 @@ function updateUI(worker) {
 
 function trackUpdates(worker) {
     worker.addEventListener('statechange', () => {
-        if(worker.state == "installed") {
+        if(worker.state === "installed") {
             updateUI(worker);
         }
     })
@@ -497,36 +581,35 @@ if ('serviceWorker' in navigator) {
         })
         .catch(error => console.log(error));
 }
+function grantNotificationRequest(){
+    messaging.requestPermission().then(() => {
+        const push = new Notification("Notification Request has been granted", {
+            body: "You can now receive notifications",
+            icon: "assets/images/icons/icon-192x192.png"
+        });
+        setTimeout(() => {
+            push.close()
+        }, 5000);
+            handleTokens();
+    }).catch(() => {
+        console.log("Notification Request has been denied");
+    })
+}
 
-window.addEventListener('beforeinstallprompt', function(event) {
-    event.preventDefault();
-    installPromptEvent = event;
-    console.log(installPromptEvent)
-});
-
-messaging.requestPermission().then(() => {
-    const push = new Notification("Notification Request has been granted", {
-        body: "You can now receive notifications",
-        icon: "assets/images/icons/icon-192x192.png"
-    });
-    setTimeout(() => {
-        push.close()
-    }, 5000);
-    return messaging.getToken();
-}).then(token => {
-    if(auth.currentUser) {
+function handleTokens() {
+    return messaging.getToken().then(token => {
         database.ref(`users/${auth.currentUser.uid}/token`).set(token)
-    }
-}).catch(() => {
-    console.log("Notification Request has been denied");
-})
-
-messaging.onMessage(payload => {
-    console.log(payload.notification)
-    $('#toast-notifications').append(renderNotification(payload.notification)).fadeIn();
+    })
+}
+function sendNotification (data) {
+    $('#toast-notifications').append(renderNotification(data)).fadeIn();
     setTimeout(() => {
         $('#toast-notifications').empty().fadeOut();
     }, 10000)
+}
+
+messaging.onMessage(payload => {
+    sendNotification(payload.notification)
 })
 
 window.onload = changeState();

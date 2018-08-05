@@ -1,4 +1,4 @@
-const cacheVersion = "v1.5.4";
+const cacheVersion = "v1.5.8";
 const cacheName = `app-olx-${cacheVersion}`;
 const files = [
   "index.html",
@@ -7,7 +7,7 @@ const files = [
   "assets/js/popper.min.js",
   "assets/js/jquery.min.js",
   "assets/js/bootstrap.min.js",
-  "https://use.fontawesome.com/releases/v5.1.0/css/all.css",
+  "assets/js/localforage.min.js",
   "assets/css/bootstrap.min.css",
   "assets/css/style.css",
   "assets/images/placeholder.png"
@@ -25,14 +25,16 @@ self.addEventListener('fetch', event => {
   var req = event.request;
   console.log('[Service Worker] Fetcting', req);
   let link = new URL(req.url);
-  if(req.url.includes("https://firebasestorage.googleapis.com/v0/b/olx-hackathon.appspot.com/o/adImages")){
-      event.respondWith(fetch(req.url, {
-        "mode": "no-cors"
-      }).catch(() => {
-        return caches.match('assets/images/placeholder.png')
-      }));
-      console.log(req.url);
-      return
+  if(req.url.includes("https://firebasestorage.googleapis.com/v0/b/olx-hackathon.appspot.com/o/adImages") && 
+  req.url.includes("alt=media&token=")){
+      event.respondWith(
+          fetch(req.url, {
+              mode: "no-cors"
+            }
+          ).catch(() => {
+            return caches.match('assets/images/placeholder.png')
+          })
+      )
   }
   if (link.origin === location.origin) {
       event.respondWith(

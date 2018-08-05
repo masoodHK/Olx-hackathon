@@ -9,24 +9,30 @@
 
     <title>OLX Pakistan - Hackathon</title>
 
-    <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css">
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="manifest" href="/manifest.json">
-    <script src="https://cdn.jsdelivr.net/npm/firebase@5.2.0/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase.js"></script>
+    <script src="assets/js/localforage.min.js"></script>
     <script src="assets/js/auth.js"></script>
 </head>
 
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm">
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" href="javascript:void(0)">
                     <img src="assets/images/icons/icon-72x72.png">
                 </a>
-                <div class="inline ml-auto">
-                    <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#login">Log In</button>
-                    <button type="button" class="btn btn-primary ml-2" data-toggle="modal" data-target="#signin">Sign up</button>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainMenu">
+                    <form class="form-inline ml-auto">
+                        <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#login">Log In</button>
+                        <button type="button" class="btn btn-primary ml-2" data-toggle="modal" data-target=".bd-example-modal-lg">Sign up</button>
+                    </form>
                 </div>
             </div>
         </nav>
@@ -39,7 +45,7 @@
                         <select class="form-control" id="categories">
                             <option value="">Select Categories</option>
                             <option value="clothings">Clothings</option>
-                            <option value="mobile-accessories">Mobile Accessories</option>
+                            <option value="mobile-phones">Mobile Phones and Accessories</option>
                             <option value="home-ownership">Home Ownership or Rental</option>
                             <option value="jobs">Jobs</option>
                             <option value="retail-stores">Retail Store or Ownership</option>
@@ -54,9 +60,7 @@
                         <input type="text" class="form-control" id="searchBar">
                     </div>
                     <div class="form-group-col">
-                        <button class="btn btn-primary" onclick="search()">
-                            <i class="fa fa-search"></i> Search
-                        </button>
+                        <button class="btn btn-primary" onclick="search()">Search</button>
                     </div>
                 </div>
             </div>
@@ -144,8 +148,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Chat with:
-                        <span id="individual"></span> for
-                        <span id="ad"></span>
+                        <span id="individual"></span>
                     </h4>
                 </div>
                 <div class="modal-body">
@@ -157,7 +160,7 @@
                         </div>
                         <div class="form-group col">
                             <button class="btn btn-primary" id="send">
-                                <i class="fa fa-envelope"></i> Send Message
+                                Send Message
                             </button>
                         </div>
                     </div>
@@ -169,38 +172,86 @@
         </div>
     </div>
     <!-- Modal -->
-    <div class="modal fade" id="profile" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal fade" id="profile" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title" id="modelTitleId">User's Ad Listings</h4>
+                    <h4 class="modal-title" id="modelTitleId">User's Profile</h4>
                 </div>
                 <div class="modal-body">
-                    <h4>Your Advertisements</h4>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Advertisement Name</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="ads">
-                        </tbody>
-                    </table>
-                    <hr>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Current Chats</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="chats">
-                        </tbody>
-                    </table>
+                    <h4>Username: <span id="display-name"></span></h4>
+                    <p>Email Address: <span id="email-address"></span></p>
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Ads</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Chats</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="favorites-tab" data-toggle="tab" href="#favorites" role="tab" aria-controls="favorites" aria-selected="false">Favorites</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="saved-for-offline-tab" data-toggle="tab" href="#saved-for-offline" role="tab" aria-controls="saved-for-offline" aria-selected="false">Saved for Offline</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                            <h5>Your Advertisements</h5>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Advertisement Name</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ads">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                            <h5>Your Chats</h5>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Current Chats</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="chats">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane" id="favorites">
+                            <h5>Your Favorites</h5>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Current Favorites</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="saves">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane" id="saved-for-offline">
+                            <h5>Saved Ads</h5>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Saved Ads</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="saves">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -229,7 +280,7 @@
                             <select class="form-control" id="formCategories">
                                 <option value="">Select Categories</option>
                                 <option value="clothings">Clothings</option>
-                                <option value="mobile-accessories">Mobile Accessories</option>
+                                <option value="mobile-phones">Mobile Phones and Accessories</option>
                                 <option value="home-ownership">Home Ownership or Rental</option>
                                 <option value="jobs">Jobs</option>
                                 <option value="retail-stores">Retail Store or Ownership</option>
@@ -254,6 +305,24 @@
                         </div>
                         <button class="btn btn-primary" onclick="addNewAd()">Submit</button>
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="adModal" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="modelTitleId">Advertisement</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="ad"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
